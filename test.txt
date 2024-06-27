@@ -1,0 +1,32 @@
+val lines = sc.textFile("C:/Spark/RDD.txt")
+val totalLines = lines.count()
+val nonEmptyLines = lines.filter(_.nonEmpty)
+val nonEmptyLinesCount = nonEmptyLines.count()
+val targetWord = "Spark"
+val wordCount = nonEmptyLines.flatMap(_.split("\\s+")).filter(_ == targetWord).count()
+
+val list1 = List(("a", 10), ("b", 20), ("c", 30))
+val list2 = List(("d", 40), ("e", 50), ("a", 60), ("c", 70), ("b", 80))
+val rdd1 = sc.parallelize(list1)
+val rdd2 = sc.parallelize(list2)
+val combinedRDD = rdd1.union(rdd2)
+val aggregatedRDD = combinedRDD.reduceByKey(_ + _)
+val sortedRDD = aggregatedRDD.sortBy(_._2, ascending = false)
+sortedRDD.collect().foreach(println)
+
+val rdd = sc.textFile("C:/Spark/cities.txt")
+rdd.collect()
+val df=rdd.map{x => val per = x.split(",") ; (per(0).trim.toString,per(1).trim.toInt,per(2).trim.toInt,per(3).trim.toInt,per(4).trim.toString)}.toDF("Имя","PHP","Java","Python", "пол")
+
+val first = df.select("Имя").filter($"Java" > 60)
+first.show()
+
+val pythonAvg = df.agg(avg("Python").alias("average")).first().getAs[Double]("average")
+val second = df.filter($"Python" > pythonAvg)
+second.show()
+
+val third = df.withColumn("PHP", when($"Имя" === "Jack", 5).otherwise($"PHP"))
+third.show()
+
+val fourth = df.select("Имя", "Python")
+fourth.show()
