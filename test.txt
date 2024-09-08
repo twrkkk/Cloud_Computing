@@ -14,19 +14,43 @@ val aggregatedRDD = combinedRDD.reduceByKey(_ + _)
 val sortedRDD = aggregatedRDD.sortBy(_._2, ascending = false)
 sortedRDD.collect().foreach(println)
 
+//1 вариант
 val rdd = sc.textFile("C:/Spark/cities.txt")
 rdd.collect()
 val df=rdd.map{x => val per = x.split(",") ; (per(0).trim.toString,per(1).trim.toInt,per(2).trim.toInt,per(3).trim.toInt,per(4).trim.toString)}.toDF("Имя","PHP","Java","Python", "пол")
-
 val first = df.select("Имя").filter($"Java" > 60)
 first.show()
-
 val pythonAvg = df.agg(avg("Python").alias("average")).first().getAs[Double]("average")
 val second = df.filter($"Python" > pythonAvg)
 second.show()
-
 val third = df.withColumn("PHP", when($"Имя" === "Jack", 5).otherwise($"PHP"))
 third.show()
-
 val fourth = df.select("Имя", "Python")
+fourth.show()
+
+//2 вариант
+val rdd = sc.textFile("C:/Practice/test2.txt")
+rdd.collect()
+val df=rdd.map{x => val per = x.split(",") ; (per(0).trim.toString,per(1).trim.toString,per(2).trim.toString,per(3).trim.toInt)}.toDF("Название","Континент","Регион","Площадь")
+val first = df.select("Название").filter('Площадь > 30000)
+first.show()
+val second = df.select("Название").filter('Регион === "Caribbean" && 'Площадь > 200)
+second.show()
+val third = df.withColumn("Площадь", when('Название === "Andorra", 555).otherwise('Площадь))
+third.show()
+var fourth = df.select("Континент", "Регион")
+fourth.show()
+
+//3 вариант
+val rdd = sc.textFile("C:/Practice/test3.txt")
+rdd.collect()
+val df=rdd.map{x => val per = x.split(",") ; (per(0).trim.toString,per(1).trim.toString,per(2).trim.toInt,per(3).trim.toInt)}.toDF("Country","Region","Population","Area")
+val first = df.select("Country").filter('Population > 75000)
+first.show()
+val AreaAvg = df.agg(avg("Area").alias("average")).first().getAs[Double]("average")
+val second = df.select("Country").filter(('Region === "NEAR EAST" || 'Region === "Caribbean") && 'Area > AreaAvg)
+second.show()
+val third = df.withColumn("Population", when('Country === "Bahrein", 999).otherwise('Population))
+third.show()
+var fourth = df.select("Country", "Area")
 fourth.show()
